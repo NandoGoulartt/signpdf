@@ -74,54 +74,61 @@ const PDFSigningPage = () => {
   };
 
   return (
-    <Container maxW="container.xl" width="90%">
-      <Center mt="8">
-        <Box p="6" borderWidth="1px" borderRadius="lg" boxShadow="lg">
-          <VStack spacing="4">
-            <Heading mb="4">Assinatura de PDF</Heading>
-            <Input type="file" onChange={handlePDFUpload} />
-            {pdfUrl && (
-              <VStack spacing="4">
-                <iframe
-                  src={pdfUrl}
-                  title="PDF Viewer"
-                  width="100%"
-                  height="500px"
-                />
-                <Box borderWidth="1px" borderRadius="lg">
-                  <SignatureCanvas
-                    ref={signatureCanvasRef}
-                    canvasProps={{
-                      width: 300,
-                      height: 150,
-                      className: "signature-canvas",
-                    }}
+    <Box
+      minHeight="100vh"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+    >
+      <Container maxW="container.xl" width="90%">
+        <Center mt="8">
+          <Box p="6" borderWidth="1px" borderRadius="lg" boxShadow="lg">
+            <VStack spacing="4">
+              <Heading mb="4">Assinatura de PDF</Heading>
+              <Input type="file" onChange={handlePDFUpload} />
+              {pdfUrl && (
+                <VStack spacing="4">
+                  <embed
+                    src={pdfUrl}
+                    type="application/pdf"
+                    width="100%"
+                    height="100%"
                   />
-                </Box>
-                <NumberInput
-                  value={signatureX}
-                  onChange={(value) => setSignatureX(parseInt(value))}
-                >
-                  <NumberInputField placeholder="Posição X" />
-                </NumberInput>
-                <NumberInput
-                  value={signatureY}
-                  onChange={(value) => setSignatureY(parseInt(value))}
-                >
-                  <NumberInputField placeholder="Posição Y" />
-                </NumberInput>
-                <Button colorScheme="teal" onClick={handleSignPDF}>
-                  Assinar PDF
-                </Button>
-                <Button colorScheme="teal" onClick={downloadSignedPDF}>
-                  Baixar PDF Assinado
-                </Button>
-              </VStack>
-            )}
-          </VStack>
-        </Box>
-      </Center>
-    </Container>
+                  {/* <NumberInput
+                    value={signatureX}
+                    onChange={(value) => setSignatureX(parseInt(value))}
+                  >
+                    <NumberInputField placeholder="Posição X" />
+                  </NumberInput>
+                  <NumberInput
+                    value={signatureY}
+                    onChange={(value) => setSignatureY(parseInt(value))}
+                  >
+                    <NumberInputField placeholder="Posição Y" />
+                  </NumberInput> */}
+                  <Box borderWidth="1px" borderRadius="lg">
+                    <SignatureCanvas
+                      ref={signatureCanvasRef}
+                      canvasProps={{
+                        width: 600,
+                        height: 300,
+                        className: "signature-canvas",
+                      }}
+                    />
+                  </Box>
+                  <Button colorScheme="teal" onClick={handleSignPDF}>
+                    Assinar PDF
+                  </Button>
+                  <Button colorScheme="teal" onClick={downloadSignedPDF}>
+                    Baixar PDF Assinado
+                  </Button>
+                </VStack>
+              )}
+            </VStack>
+          </Box>
+        </Center>
+      </Container>
+    </Box>
   );
 };
 
