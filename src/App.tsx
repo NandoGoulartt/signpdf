@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -6,19 +6,28 @@ import {
   Container,
   Heading,
   Input,
+  NumberInput,
+  NumberInputField,
   VStack,
-} from '@chakra-ui/react';
-import SignatureCanvas from 'react-signature-canvas';
-import { PDFDocument } from 'pdf-lib';
+} from "@chakra-ui/react";
+import SignatureCanvas from "react-signature-canvas";
+import { PDFDocument } from "pdf-lib";
 
 const PDFSigningPage = () => {
   const [pdfFile, setPDFFile] = useState<File | null>(null);
   const [signedPdfBlob, setSignedPdfBlob] = useState<Blob | null>(null);
+  const [signatureX, setSignatureX] = useState<number>(100);
+  const [signatureY, setSignatureY] = useState<number>(100);
   const signatureCanvasRef = useRef<SignatureCanvas | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   const handlePDFUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setPDFFile(e.target.files[0]);
+      const uploadedPdfFile = e.target.files[0];
+      setPDFFile(uploadedPdfFile);
+
+      const pdfUrl = URL.createObjectURL(uploadedPdfFile);
+      setPdfUrl(pdfUrl);
     }
   };
 
@@ -69,10 +78,35 @@ const PDFSigningPage = () => {
           <VStack spacing="4">
             <Heading mb="4">Assinatura de PDF</Heading>
             <Input type="file" onChange={handlePDFUpload} />
-            <SignatureCanvas
+            {pdfUrl && (
+              <iframe
+                src={pdfUrl}
+                title="PDF Viewer"
+                width="100%"
+                height="500px"
+              />
+            )}
+            <Box borderWidth="1px" borderRadius="lg"><SignatureCanvas
               ref={signatureCanvasRef}
-              canvasProps={{ width: 300, height: 150, className: 'signature-canvas' }}
+              canvasProps={{
+                width: 300,
+                height: 150,
+                className: "signature-canvas",
+              }}
             />
+            </Box>
+            <NumberInput
+              value={signatureX}
+              onChange={(value) => setSignatureX(parseInt(value))}
+            >
+              <NumberInputField placeholder="Posição X" />
+            </NumberInput>
+            <NumberInput
+              value={signatureY}
+              onChange={(value) => setSignatureY(parseInt(value))}
+            >
+              <NumberInputField placeholder="Posição Y" />
+            </NumberInput>
             <Button colorScheme="teal" onClick={handleSignPDF}>
               Assinar PDF
             </Button>
