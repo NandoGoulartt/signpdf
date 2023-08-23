@@ -40,7 +40,7 @@ const PDFSigningPage = () => {
       const signatureImage = signatureCanvasRef.current.toDataURL();
 
       const image = await pdfDoc.embedPng(signatureImage);
-      const dims = image.scale(0.25);
+      const dims = image.scale(0.5);
 
       const pageWidth = page.getWidth();
       const pageHeight = page.getHeight();
@@ -54,7 +54,9 @@ const PDFSigningPage = () => {
 
       const modifiedPdfBytes = await pdfDoc.save();
 
-      const signedBlob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+      const signedBlob = new Blob([modifiedPdfBytes], {
+        type: "application/pdf",
+      });
 
       setSignedPdfBlob(signedBlob);
     }
@@ -63,56 +65,59 @@ const PDFSigningPage = () => {
   const downloadSignedPDF = () => {
     if (signedPdfBlob) {
       const url = URL.createObjectURL(signedPdfBlob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = 'signed.pdf';
+      link.download = "DocumentoAssinado.pdf";
       link.click();
       URL.revokeObjectURL(url);
     }
   };
 
   return (
-    <Container maxW="xl">
+    <Container maxW="container.xl" width="90%">
       <Center mt="8">
         <Box p="6" borderWidth="1px" borderRadius="lg" boxShadow="lg">
           <VStack spacing="4">
             <Heading mb="4">Assinatura de PDF</Heading>
             <Input type="file" onChange={handlePDFUpload} />
             {pdfUrl && (
-              <iframe
-                src={pdfUrl}
-                title="PDF Viewer"
-                width="100%"
-                height="500px"
-              />
+              <VStack spacing="4">
+                <iframe
+                  src={pdfUrl}
+                  title="PDF Viewer"
+                  width="100%"
+                  height="500px"
+                />
+                <Box borderWidth="1px" borderRadius="lg">
+                  <SignatureCanvas
+                    ref={signatureCanvasRef}
+                    canvasProps={{
+                      width: 300,
+                      height: 150,
+                      className: "signature-canvas",
+                    }}
+                  />
+                </Box>
+                <NumberInput
+                  value={signatureX}
+                  onChange={(value) => setSignatureX(parseInt(value))}
+                >
+                  <NumberInputField placeholder="Posição X" />
+                </NumberInput>
+                <NumberInput
+                  value={signatureY}
+                  onChange={(value) => setSignatureY(parseInt(value))}
+                >
+                  <NumberInputField placeholder="Posição Y" />
+                </NumberInput>
+                <Button colorScheme="teal" onClick={handleSignPDF}>
+                  Assinar PDF
+                </Button>
+                <Button colorScheme="teal" onClick={downloadSignedPDF}>
+                  Baixar PDF Assinado
+                </Button>
+              </VStack>
             )}
-            <Box borderWidth="1px" borderRadius="lg"><SignatureCanvas
-              ref={signatureCanvasRef}
-              canvasProps={{
-                width: 300,
-                height: 150,
-                className: "signature-canvas",
-              }}
-            />
-            </Box>
-            <NumberInput
-              value={signatureX}
-              onChange={(value) => setSignatureX(parseInt(value))}
-            >
-              <NumberInputField placeholder="Posição X" />
-            </NumberInput>
-            <NumberInput
-              value={signatureY}
-              onChange={(value) => setSignatureY(parseInt(value))}
-            >
-              <NumberInputField placeholder="Posição Y" />
-            </NumberInput>
-            <Button colorScheme="teal" onClick={handleSignPDF}>
-              Assinar PDF
-            </Button>
-            <Button colorScheme="teal" onClick={downloadSignedPDF}>
-              Baixar PDF Assinado
-            </Button>
           </VStack>
         </Box>
       </Center>
