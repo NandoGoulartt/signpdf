@@ -12,15 +12,18 @@ import {
 } from "@chakra-ui/react";
 import SignatureCanvas from "react-signature-canvas";
 import { PDFDocument } from "pdf-lib";
+import { Document, Page, pdfjs } from "react-pdf";
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const PDFSigningPage = () => {
   const [pdfFile, setPDFFile] = useState<File | null>(null);
   const [signedPdfBlob, setSignedPdfBlob] = useState<Blob | null>(null);
-  const [signatureX, setSignatureX] = useState<number>(100);
-  const [signatureY, setSignatureY] = useState<number>(100);
+  const [signatureX, setSignatureX] = useState<number>(50);
+  const [signatureY, setSignatureY] = useState<number>(50);
   const signatureCanvasRef = useRef<SignatureCanvas | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [pdfHeight, setPdfHeight] = useState<number | null>(null);
+  const [pdfWidth, setPdfWidth] = useState<number | undefined>(undefined);
+  const [pdfHeight, setPdfHeight] = useState<number | undefined>(undefined);
 
   const handlePDFUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -52,8 +55,8 @@ const PDFSigningPage = () => {
       const pageWidth = page.getWidth();
 
       page.drawImage(image, {
-        x: pageWidth - dims.width - 50,
-        y: 50,
+        x: pageWidth - dims.width - signatureX,
+        y: signatureY,
         width: dims.width,
         height: dims.height,
       });
@@ -65,6 +68,16 @@ const PDFSigningPage = () => {
       });
 
       setSignedPdfBlob(signedBlob);
+    }
+  };
+  const handlePdfClick = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    if (signatureCanvasRef.current && pdfHeight !== undefined) {
+      const signatureX = event.nativeEvent.offsetX;
+      const signatureY = pdfHeight - event.nativeEvent.offsetY;
+      setSignatureX(signatureX);
+      setSignatureY(signatureY);
     }
   };
 
@@ -94,13 +107,13 @@ const PDFSigningPage = () => {
               <Input type="file" onChange={handlePDFUpload} />
               {pdfUrl && (
                 <VStack spacing="4">
-                  <embed
-                    src={pdfUrl}
-                    type="application/pdf"
-                    width="100%"
-                    height={`${pdfHeight}px`}
-                  />
-                  {/* <NumberInput
+                  <Document
+                    file={pdfUrl}
+                    onClick={(event) => handlePdfClick(event)}
+                  >
+                    <Page pageNumber={1} width={600} height={300} />
+                  </Document>
+                  <NumberInput
                     value={signatureX}
                     onChange={(value) => setSignatureX(parseInt(value))}
                   >
@@ -111,7 +124,7 @@ const PDFSigningPage = () => {
                     onChange={(value) => setSignatureY(parseInt(value))}
                   >
                     <NumberInputField placeholder="Posição Y" />
-                  </NumberInput> */}
+                  </NumberInput>
                   <Box borderWidth="1px" borderRadius="lg">
                     <SignatureCanvas
                       ref={signatureCanvasRef}
