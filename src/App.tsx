@@ -107,12 +107,15 @@ const PDFSigningPage = () => {
               <Input type="file" onChange={handlePDFUpload} />
               {pdfUrl && (
                 <VStack spacing="4">
+                  <Box maxH={pdfHeight} overflow="hidden">
                   <Document
                     file={pdfUrl}
                     onClick={(event) => handlePdfClick(event)}
                   >
                     <Page pageNumber={1} width={pdfWidth} height={pdfHeight} />
                   </Document>
+                  </Box>
+
                   <NumberInput
                     value={signatureX}
                     onChange={(value) => setSignatureX(parseInt(value))}
