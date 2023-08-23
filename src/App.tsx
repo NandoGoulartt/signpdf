@@ -23,7 +23,7 @@ const PDFSigningPage = () => {
   const signatureCanvasRef = useRef<SignatureCanvas | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfWidth, setPdfWidth] = useState<number | undefined>(undefined);
-  const [pdfHeight, setPdfHeight] = useState<number | undefined>(undefined);
+  const [pdfHeight, setPdfHeight] = useState<number | undefined>(300);
 
   const handlePDFUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -35,8 +35,10 @@ const PDFSigningPage = () => {
       const pdfBytes = await uploadedPdfFile.arrayBuffer();
       const pdfDoc = await PDFDocument.load(pdfBytes);
       const page = pdfDoc.getPages()[0];
+      const pageWidth = page.getWidth();
       const pageHeight = page.getHeight();
-
+  
+      setPdfWidth(pageWidth);
       setPdfHeight(pageHeight);
     }
   };
@@ -52,11 +54,9 @@ const PDFSigningPage = () => {
       const image = await pdfDoc.embedPng(signatureImage);
       const dims = image.scale(0.5);
 
-      const pageWidth = page.getWidth();
-
       page.drawImage(image, {
-        x: pageWidth - dims.width - signatureX,
-        y: signatureY,
+        x: signatureX - (dims.width/2),
+        y: signatureY - (dims.height/2),
         width: dims.width,
         height: dims.height,
       });
@@ -111,7 +111,7 @@ const PDFSigningPage = () => {
                     file={pdfUrl}
                     onClick={(event) => handlePdfClick(event)}
                   >
-                    <Page pageNumber={1} width={600} height={300} />
+                    <Page pageNumber={1} width={pdfWidth} height={pdfHeight} />
                   </Document>
                   <NumberInput
                     value={signatureX}
