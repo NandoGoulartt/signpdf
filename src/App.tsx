@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -81,7 +81,7 @@ const PDFSigningPage = () => {
     }
   };
 
-  const downloadSignedPDF = () => {
+  useEffect(() => {
     if (signedPdfBlob) {
       const url = URL.createObjectURL(signedPdfBlob);
       const link = document.createElement("a");
@@ -90,7 +90,7 @@ const PDFSigningPage = () => {
       link.click();
       URL.revokeObjectURL(url);
     }
-  };
+  }, [signedPdfBlob]);
 
   return (
     <Box
@@ -139,10 +139,7 @@ const PDFSigningPage = () => {
                     />
                   </Box>
                   <Button colorScheme="teal" onClick={handleSignPDF}>
-                    Assinar PDF
-                  </Button>
-                  <Button colorScheme="teal" onClick={downloadSignedPDF}>
-                    Baixar PDF Assinado
+                    Assinar e Baixar
                   </Button>
                 </VStack>
               )}
