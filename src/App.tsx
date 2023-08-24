@@ -7,8 +7,6 @@ import {
   Container,
   Heading,
   Input,
-  NumberInput,
-  NumberInputField,
   VStack,
 } from "@chakra-ui/react";
 import SignatureCanvas from "react-signature-canvas";
@@ -19,14 +17,13 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 const PDFSigningPage = () => {
   const [pdfFile, setPDFFile] = useState<File | null>(null);
   const [signedPdfBlob, setSignedPdfBlob] = useState<Blob | null>(null);
-  const [signatureX, setSignatureX] = useState<number>(50);
-  const [signatureY, setSignatureY] = useState<number>(50);
+  const [signatureX, setSignatureX] = useState<number>(100);
+  const [signatureY, setSignatureY] = useState<number>(100);
   const signatureCanvasRef = useRef<SignatureCanvas | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfWidth, setPdfWidth] = useState<number | undefined>(undefined);
   const [pdfHeight, setPdfHeight] = useState<number | undefined>(300);
   const [isCanvasEmpty, setIsCanvasEmpty] = useState(true);
-
 
   const handlePDFUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -64,7 +61,7 @@ const PDFSigningPage = () => {
       });
       const isCanvasEmpty = signatureCanvasRef.current.isEmpty();
       setIsCanvasEmpty(isCanvasEmpty);
-  
+
       const modifiedPdfBytes = await pdfDoc.save();
 
       const signedBlob = new Blob([modifiedPdfBytes], {
@@ -92,7 +89,6 @@ const PDFSigningPage = () => {
   };
 
   useEffect(() => {
-    console.log(signedPdfBlob)
     if (signedPdfBlob && !isCanvasEmpty) {
       const url = URL.createObjectURL(signedPdfBlob);
       const link = document.createElement("a");
@@ -118,31 +114,30 @@ const PDFSigningPage = () => {
               <Input type="file" onChange={handlePDFUpload} />
               {pdfUrl && (
                 <VStack spacing="4">
-                  <Box maxH={pdfHeight} overflow="hidden">
+                  <Box maxH={pdfHeight} position={"relative"} overflow="hidden">
                     <Document
                       file={pdfUrl}
                       onClick={(event) => handlePdfClick(event)}
                     >
-                      <Page
-                        pageNumber={1}
-                        width={pdfWidth}
-                        height={pdfHeight}
-                      />
+                      <Page pageNumber={1} width={pdfWidth} height={pdfHeight}>
+                        {" "}
+                        {(pdfHeight !== undefined && pdfWidth !== undefined)&& (
+                          <Center
+                            style={{
+                              position: "absolute",
+                              left: signatureX - 50,
+                              top: pdfHeight - signatureY - 10,
+                              width: 100,
+                              height: 20,
+                              backgroundColor: "red",
+                              borderRadius: '7%',
+                              opacity: 0.5,pointerEvents: "none",
+                            }}
+                          >Assinatura</Center>
+                        )}
+                      </Page>
                     </Document>
                   </Box>
-
-                  <NumberInput
-                    value={signatureX}
-                    onChange={(value) => setSignatureX(parseInt(value))}
-                  >
-                    <NumberInputField placeholder="Posição X" />
-                  </NumberInput>
-                  <NumberInput
-                    value={signatureY}
-                    onChange={(value) => setSignatureY(parseInt(value))}
-                  >
-                    <NumberInputField placeholder="Posição Y" />
-                  </NumberInput>
                   <Box borderWidth="1px" borderRadius="lg">
                     <SignatureCanvas
                       ref={signatureCanvasRef}
