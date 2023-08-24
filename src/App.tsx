@@ -67,7 +67,10 @@ const PDFSigningPage = () => {
         type: "application/pdf",
       });
 
+      console.log("setou o blob")
+      console.log(signedBlob)
       setSignedPdfBlob(signedBlob);
+      console.log(signedPdfBlob)
     }
   };
   const handlePdfClick = (
@@ -83,6 +86,7 @@ const PDFSigningPage = () => {
 
   useEffect(() => {
     if (signedPdfBlob) {
+      console.log('caiu dentro')
       const url = URL.createObjectURL(signedPdfBlob);
       const link = document.createElement("a");
       link.href = url;
@@ -91,6 +95,12 @@ const PDFSigningPage = () => {
       URL.revokeObjectURL(url);
     }
   }, [signedPdfBlob]);
+
+  const teste = () => {
+    handleSignPDF()
+    downloadSignedPDF()
+  };
+
 
   return (
     <Box
