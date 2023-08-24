@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
+  Flex,
   Center,
   Container,
   Heading,
@@ -24,6 +25,8 @@ const PDFSigningPage = () => {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfWidth, setPdfWidth] = useState<number | undefined>(undefined);
   const [pdfHeight, setPdfHeight] = useState<number | undefined>(300);
+  const [isCanvasEmpty, setIsCanvasEmpty] = useState(true);
+
 
   const handlePDFUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -37,7 +40,7 @@ const PDFSigningPage = () => {
       const page = pdfDoc.getPages()[0];
       const pageWidth = page.getWidth();
       const pageHeight = page.getHeight();
-  
+
       setPdfWidth(pageWidth);
       setPdfHeight(pageHeight);
     }
@@ -50,23 +53,24 @@ const PDFSigningPage = () => {
       const page = pdfDoc.getPages()[0];
 
       const signatureImage = signatureCanvasRef.current.toDataURL();
-
       const image = await pdfDoc.embedPng(signatureImage);
       const dims = image.scale(0.5);
 
       page.drawImage(image, {
-        x: signatureX - (dims.width/2),
-        y: signatureY - (dims.height/2),
+        x: signatureX - dims.width / 2,
+        y: signatureY - dims.height / 2,
         width: dims.width,
         height: dims.height,
       });
-
+      const isCanvasEmpty = signatureCanvasRef.current.isEmpty();
+      setIsCanvasEmpty(isCanvasEmpty);
+  
       const modifiedPdfBytes = await pdfDoc.save();
 
       const signedBlob = new Blob([modifiedPdfBytes], {
         type: "application/pdf",
       });
-      
+
       setSignedPdfBlob(signedBlob);
     }
   };
@@ -81,9 +85,15 @@ const PDFSigningPage = () => {
     }
   };
 
+  const handleClearSignature = () => {
+    if (signatureCanvasRef.current) {
+      signatureCanvasRef.current.clear();
+    }
+  };
+
   useEffect(() => {
-    if (signedPdfBlob) {
-      console.log('caiu dentro')
+    console.log(signedPdfBlob)
+    if (signedPdfBlob && !isCanvasEmpty) {
       const url = URL.createObjectURL(signedPdfBlob);
       const link = document.createElement("a");
       link.href = url;
@@ -91,7 +101,7 @@ const PDFSigningPage = () => {
       link.click();
       URL.revokeObjectURL(url);
     }
-  }, [signedPdfBlob]);
+  }, [signedPdfBlob, isCanvasEmpty]);
 
   return (
     <Box
@@ -109,12 +119,16 @@ const PDFSigningPage = () => {
               {pdfUrl && (
                 <VStack spacing="4">
                   <Box maxH={pdfHeight} overflow="hidden">
-                  <Document
-                    file={pdfUrl}
-                    onClick={(event) => handlePdfClick(event)}
-                  >
-                    <Page pageNumber={1} width={pdfWidth} height={pdfHeight} />
-                  </Document>
+                    <Document
+                      file={pdfUrl}
+                      onClick={(event) => handlePdfClick(event)}
+                    >
+                      <Page
+                        pageNumber={1}
+                        width={pdfWidth}
+                        height={pdfHeight}
+                      />
+                    </Document>
                   </Box>
 
                   <NumberInput
@@ -139,9 +153,14 @@ const PDFSigningPage = () => {
                       }}
                     />
                   </Box>
-                  <Button colorScheme="teal" onClick={handleSignPDF}>
-                    Assinar e Baixar
-                  </Button>
+                  <Flex gap={4}>
+                    <Button colorScheme="teal" onClick={handleSignPDF}>
+                      Assinar e Baixar
+                    </Button>
+                    <Button colorScheme="teal" onClick={handleClearSignature}>
+                      Limpar
+                    </Button>
+                  </Flex>
                 </VStack>
               )}
             </VStack>
