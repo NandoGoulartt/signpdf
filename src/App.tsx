@@ -66,11 +66,8 @@ const PDFSigningPage = () => {
       const signedBlob = new Blob([modifiedPdfBytes], {
         type: "application/pdf",
       });
-
-      console.log("setou o blob")
-      console.log(signedBlob)
+      
       setSignedPdfBlob(signedBlob);
-      console.log(signedPdfBlob)
     }
   };
   const handlePdfClick = (
@@ -95,12 +92,6 @@ const PDFSigningPage = () => {
       URL.revokeObjectURL(url);
     }
   }, [signedPdfBlob]);
-
-  const teste = () => {
-    handleSignPDF()
-    downloadSignedPDF()
-  };
-
 
   return (
     <Box
