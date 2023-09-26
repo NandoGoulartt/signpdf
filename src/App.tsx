@@ -12,6 +12,7 @@ import {
 import SignatureCanvas from "react-signature-canvas";
 import { PDFDocument } from "pdf-lib";
 import { Document, Page, pdfjs } from "react-pdf";
+import { ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const PDFSigningPage = () => {
@@ -23,6 +24,7 @@ const PDFSigningPage = () => {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfWidth, setPdfWidth] = useState<number | undefined>(undefined);
   const [pdfHeight, setPdfHeight] = useState<number | undefined>(300);
+  const [pageNumber, setPageNumber] = useState<number>(1);
   const [isCanvasEmpty, setIsCanvasEmpty] = useState(true);
 
   const handlePDFUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,7 +49,7 @@ const PDFSigningPage = () => {
     if (pdfFile && signatureCanvasRef.current) {
       const pdfBytes = await pdfFile.arrayBuffer();
       const pdfDoc = await PDFDocument.load(pdfBytes);
-      const page = pdfDoc.getPages()[0];
+      const page = pdfDoc.getPages()[pageNumber - 1];
 
       const signatureImage = signatureCanvasRef.current.toDataURL();
       const image = await pdfDoc.embedPng(signatureImage);
@@ -71,6 +73,7 @@ const PDFSigningPage = () => {
       setSignedPdfBlob(signedBlob);
     }
   };
+
   const handlePdfClick = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
@@ -114,14 +117,19 @@ const PDFSigningPage = () => {
               <Input type="file" onChange={handlePDFUpload} />
               {pdfUrl && (
                 <VStack spacing="4">
-                  <Box maxH={pdfHeight} position={"relative"} overflow="hidden">
-                    <Document
-                      file={pdfUrl}
-                      onClick={(event) => handlePdfClick(event)}
-                    >
-                      <Page pageNumber={1} width={pdfWidth} height={pdfHeight}>
-                        {" "}
-                        {(pdfHeight !== undefined && pdfWidth !== undefined)&& (
+                  <Box
+                    maxH={pdfHeight}
+                    position={"relative"}
+                    overflow="hidden"
+                  >
+                    <Document file={pdfUrl}>
+                      <Page
+                        pageNumber={pageNumber}
+                        width={pdfWidth}
+                        height={pdfHeight}
+                        onClick={(event) => handlePdfClick(event)}
+                      >
+                        {(pdfHeight !== undefined && pdfWidth !== undefined) && (
                           <Center
                             style={{
                               position: "absolute",
@@ -131,12 +139,30 @@ const PDFSigningPage = () => {
                               height: 20,
                               backgroundColor: "red",
                               borderRadius: '7%',
-                              opacity: 0.5,pointerEvents: "none",
+                              opacity: 0.5,
+                              pointerEvents: "none",
                             }}
                           >Assinatura</Center>
                         )}
                       </Page>
                     </Document>
+                  </Box>
+                  <Box>
+                    <Flex gap={3}>
+                    <Button
+                      colorScheme="teal"
+                      onClick={() => setPageNumber(pageNumber - 1)}
+                    >
+                      <ArrowBackIcon/>
+                    </Button>
+                    <Flex align={'center'}>Página</Flex>
+                    <Button
+                      colorScheme="teal"
+                      onClick={() => setPageNumber(pageNumber + 1)}
+                    >
+                     <ArrowForwardIcon/>
+                    </Button>
+                    </Flex>
                   </Box>
                   <Box borderWidth="1px" borderRadius="lg">
                     <SignatureCanvas
